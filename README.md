@@ -2,6 +2,15 @@
 
 A simple command-line tool to find out what builtin functions, classes and methods are in your Python module.
 
+## Install
+
+Run
+
+```
+pip install pipspect
+```
+
+## Usage
 Simply run
 
 ```
