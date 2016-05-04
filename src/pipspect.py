@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import inspect
 import os
 import sys
@@ -108,10 +110,16 @@ def pipspect(module):
     if count == 0:
         print_with_indent('No members.')
 
-if __name__ == "__main__":
+
+def main():
     if len(sys.argv) < 2:
         sys.exit('Usage: %s <module>' % sys.argv[0])
 
     module = sys.argv[1].replace('.py', '')
     mod = __import__(module)
     pipspect(mod)
+
+
+if __name__ == "__main__":
+    main()
+    

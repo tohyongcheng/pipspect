@@ -5,7 +5,10 @@ A simple command-line tool to find out what builtin functions, classes and metho
 Simply run
 
 ```
-$ pipspect sys
+$ pipspect <module>
+
+# For example:
+$ pipspect module.py
 
 ```
 
