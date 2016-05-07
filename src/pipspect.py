@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 
+from __future__ import print_function
 import inspect
 import os
 import sys
+
 
 INDENT_LEVEL = 0
 
@@ -20,9 +22,17 @@ def dedent():
 def print_with_indent(*args):
     """Prints lines with indents"""
     if INDENT_LEVEL:
-        print "\t"*INDENT_LEVEL,
+        print("\t" * INDENT_LEVEL, end='')
     for arg in args:
-        print arg,
+        print(arg, end='')
+    print()
+
+
+def print_docstr(docstr):
+    if docstr:
+        for line in docstr.split('\n'):
+            print_with_indent(line)
+        print_with_indent()
 
 
 def inspect_class(obj):
@@ -37,37 +47,49 @@ def inspect_class(obj):
             inspect_function(node)
 
     dedent()
-    print
 
 
 def inspect_builtin(obj):
     """Inspects a builtin function"""
 
     print_with_indent("+Builtin Function: %s" % obj.__name__)
-    print
-
-    docstr = obj.__doc__.split('\n')
     indent()
-    if docstr:
-        for line in docstr:
-            print_with_indent(line)
-            print
+    print_docstr(obj.__doc_)
     dedent()
-    print
+    print()
+
+
+def get_arguments(func):
+    try:
+        parameters = inspect.signature(func).parameters.values()
+        args = []
+        varargs = []
+        kwargs = []
+        defaults = []
+        for param in parameters:
+            if param.kind == param.POSITIONAL_OR_KEYWORD:
+                args.append(param.name)
+                if param.default:
+                    defaults.append(param.default)
+            elif param.kind == param.VAR_POSITIONAL:
+                varargs.append(param.name)
+            elif param.kind == param.VAR_KEYWORD:
+                kwargs.append(param.name)
+        return args, varargs, kwargs, defaults
+    except AttributeError:
+        return inspect.getargspec(func)
 
 
 def inspect_function(obj):
     """Inspects the function and displays arguments"""
 
     print_with_indent("+Function %s" % obj.__name__)
-    print_with_indent("'''%s'''" % obj.__doc__)
+    print_docstr(obj.__doc__)
     try:
-        arginfo = inspect.getargspec(obj)
+        args, varargs, kwargs, defaults = get_arguments(obj)
     except TypeError:
-        print
+        print()
         return
-
-    args, varargs, kwargs, defaults = arginfo[0]
 
     if args:
         if args[0] == 'self':
@@ -78,14 +100,15 @@ def inspect_function(obj):
 
         if defaults:
             default_args = args[len(args) - len(defaults)]
-            print_with_indent('\t-Default Values:', zip(default_args, defaults))
+            print_with_indent('\t-Default Values:',
+                              zip(default_args, defaults))
 
     if varargs:
         print_with_indent('\t-Positional Arguments:', varargs)
     if kwargs:
         print_with_indent('\t-Keyword Arguments:', kwargs)
 
-    print
+    print()
 
 
 def pipspect(module):
@@ -109,6 +132,9 @@ def pipspect(module):
 
     if count == 0:
         print_with_indent('No members.')
+        print()
+
+    return True
 
 
 def main():
@@ -122,4 +148,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-    

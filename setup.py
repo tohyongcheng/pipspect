@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
   name = 'pipspect',
-  version = '0.1',
+  version = '0.2',
   entry_points={
     'console_scripts': ['pipspect=src.pipspect:main']
   },
