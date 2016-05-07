@@ -28,11 +28,12 @@ def print_with_indent(*args):
     print()
 
 
-def print_docstr(docstr):
-    if docstr:
+def print_docstr(obj):
+    if hasattr(obj, '__doc__') and obj.__doc__:
+        docstr = obj.__doc__
         for line in docstr.split('\n'):
             print_with_indent(line)
-        print_with_indent()
+        
 
 
 def inspect_class(obj):
@@ -54,7 +55,7 @@ def inspect_builtin(obj):
 
     print_with_indent("+Builtin Function: %s" % obj.__name__)
     indent()
-    print_docstr(obj.__doc_)
+    print_docstr(obj)
     dedent()
     print()
 
@@ -84,7 +85,7 @@ def inspect_function(obj):
     """Inspects the function and displays arguments"""
 
     print_with_indent("+Function %s" % obj.__name__)
-    print_docstr(obj.__doc__)
+    print_docstr(obj)
     try:
         args, varargs, kwargs, defaults = get_arguments(obj)
     except TypeError:
