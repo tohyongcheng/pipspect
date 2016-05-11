@@ -18,6 +18,8 @@ $ pipspect <module>
 
 # For example:
 $ pipspect module.py
+$ pipspect sys
+$ pipspect os
 
 ```
 
