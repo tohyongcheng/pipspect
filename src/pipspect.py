@@ -4,7 +4,7 @@ from __future__ import print_function
 import inspect
 import os
 import sys
-
+import pkgutil
 
 INDENT_LEVEL = 0
 
@@ -33,7 +33,6 @@ def print_docstr(obj):
         docstr = obj.__doc__
         for line in docstr.split('\n'):
             print_with_indent(line)
-        
 
 
 def inspect_class(obj):
@@ -43,9 +42,9 @@ def inspect_class(obj):
     indent()
 
     for name in obj.__dict__:
-        node = getattr(obj, name)
-        if inspect.ismethod(node):
-            inspect_function(node)
+        node = getattr(obj, name, None)
+        if node is not None and inspect.ismethod(node):
+            inspect_method(node)
 
     dedent()
 
@@ -112,11 +111,44 @@ def inspect_function(obj):
     print()
 
 
-def pipspect(module):
-    """Inspects the module object including its classes and functions"""
-    print_with_indent("Module: %s\n" % module.__name__)
-    indent()
+def inspect_method(obj):
+    """Inspects the function and displays arguments"""
 
+    print_with_indent("+Method %s" % obj.__name__)
+    print_docstr(obj)
+    try:
+        args, varargs, kwargs, defaults = get_arguments(obj)
+    except TypeError:
+        print()
+        return
+
+    if args:
+        if args[0] == 'self':
+            print_with_indent('\t%s is an instance method' % obj.__name__)
+            args.pop()
+
+        print_with_indent('\t-Method Arguments: ', args)
+
+        if defaults:
+            default_args = args[len(args) - len(defaults)]
+            print_with_indent('\t-Default Values:',
+                              zip(default_args, defaults))
+
+    if varargs:
+        print_with_indent('\t-Positional Arguments:', varargs)
+    if kwargs:
+        print_with_indent('\t-Keyword Arguments:', kwargs)
+
+    print()
+
+
+def inspect_module(module, depth=2):
+    """Inspects the module object including its classes and functions"""
+    if depth < 1: return
+    new_depth = depth - 1
+    print_with_indent("Module: %s\n" % module.__name__)
+
+    indent()
     count = 0
     for name in dir(module):
         obj = getattr(module, name)
@@ -130,21 +162,40 @@ def pipspect(module):
         elif inspect.isbuiltin(obj):
             count += 1
             inspect_builtin(obj)
+        elif inspect.ismodule(obj):
+            count += 1
+            inspect_module(obj, depth - 1)
+
+    if '__path__' in dir(module):
+        for importer, modname, ispkg in pkgutil.iter_modules(module.__path__):
+            try:
+                m = importer.find_module(modname).load_module(modname)
+                if modname != '__main__':
+                    inspect_module(m, depth - 1)
+                count += 1
+            except ImportError:
+                continue
 
     if count == 0:
         print_with_indent('No members.')
         print()
+    dedent()
 
     return True
 
 
 def main():
     if len(sys.argv) < 2:
-        sys.exit('Usage: %s <module>' % sys.argv[0])
+        sys.exit('Usage: %s <module> <max_depth>' % sys.argv[0])
 
     module = sys.argv[1].replace('.py', '')
     mod = __import__(module)
-    pipspect(mod)
+
+    if len(sys.argv) > 2:
+        depth = int(sys.argv[2])
+        inspect_module(mod, depth)
+    else:
+        inspect_module(mod)
 
 
 if __name__ == "__main__":
