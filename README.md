@@ -1,6 +1,6 @@
 # Pipspect
 
-A simple command-line tool to find out what builtin functions, classes and methods are in your Python module.
+A simple command-line tool to find out what modules, builtin functions, classes and methods are in your Python module.
 
 ## Install
 
@@ -14,13 +14,16 @@ pip install pipspect
 Simply run
 
 ```
-$ pipspect <module>
+$ pipspect <module> <depth(optional)>
 
-# For example:
-$ pipspect module.py
+```
+
+For example:
+
+```
 $ pipspect sys
 $ pipspect os
-
+$ pipspect module.py 2
 ```
 
 Output:
@@ -217,3 +220,9 @@ Module: sys
     function call.  See the debugger chapter in the library manual.
 
 ```
+
+## Changelog:
+
+- 0.3: pipspect can now crawl through the module's folder to find nested modules.
+- 0.2: pipspect is Python-3 compatible
+- 0.1: initial version

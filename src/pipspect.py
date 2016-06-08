@@ -145,9 +145,7 @@ def inspect_method(obj):
 def inspect_module(module, depth=2):
     """Inspects the module object including its classes and functions"""
     if depth < 1: return
-    new_depth = depth - 1
     print_with_indent("Module: %s\n" % module.__name__)
-
     indent()
     count = 0
     for name in dir(module):
@@ -192,7 +190,10 @@ def main():
     mod = __import__(module)
 
     if len(sys.argv) > 2:
-        depth = int(sys.argv[2])
+        try:
+            depth = int(sys.argv[2])
+        except:
+            sys.exit('<max_depth> must be an integer')
         inspect_module(mod, depth)
     else:
         inspect_module(mod)
